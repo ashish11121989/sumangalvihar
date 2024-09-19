@@ -12,6 +12,8 @@ body {font-size:16px;}
 .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
 .w3-half img:hover{opacity:1}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
 
@@ -279,7 +281,8 @@ body {font-size:16px;}
    <div class="w3-container" id="designers" style="margin-top:75px">
     <h1 class="w3-xxxlarge w3-text-red"><b>Complaint Status</b></h1>
     <hr style="width:50px;border:5px solid red" class="w3-round">  
-    <table border="1" style="width: 80%;">  
+    <table border="1" id="complaints" style="width: 80%;">  
+      <thead>
       <th>     
         Complaint No          
       </th>
@@ -291,32 +294,8 @@ body {font-size:16px;}
       </th> 
       <th>     
        Status 
-      </th>       
-      <tr>
-      <tr>     
-        <td>SVC_2024_1001</td>  
-        <td>Complaint Description Text</td>            
-        <td>11/12/2024</td>  
-        <td style="background-color: lightgreen;">Resolved</td>           
-      </tr>
-      <tr>
-        <td>SVC_2024_1002</td>  
-        <td>Complaint Description Text</td>            
-        <td>1/5/2024</td>   
-        <td style="background-color: lightsalmon;">Pending</td>         
-      </tr>
-      <tr>
-        <td>SVC_2024_1003</td>  
-        <td>Complaint Description Text</td>            
-        <td>20/6/2024</td>  
-        <td style="background-color:lightgreen;">Resolved</td>          
-      </tr>
-      <tr>
-        <td>SVC_2024_1004</td>   
-        <td>Complaint Description Text</td>            
-        <td>20/6/2024</td>  
-        <td style="background-color: lightsalmon;">Pending</td>         
-      </tr>      
+      </th>   </thead><tbody></tbody>
+               
     </table> 
   </div> 
 
@@ -325,7 +304,7 @@ body {font-size:16px;}
     <h1 class="w3-xxxlarge w3-text-red"><b>New Complaint</b></h1>
     <hr style="width:50px;border:5px solid red" class="w3-round">
     <p>Register a new complaint and our team will get back to you on the resolution !!!</p>
-    <form action="/action_page.php" target="_blank">
+   <form action="#" id="complaintsForm"> 
       <div class="w3-section">
         <label>Name</label>
         <input class="w3-input w3-border" type="text" name="Name" required>
@@ -339,7 +318,7 @@ body {font-size:16px;}
         <input class="w3-input w3-border" type="text" name="Message" required>
       </div>
       <button type="submit" class="w3-button w3-block w3-padding-large w3-red w3-margin-bottom">Submit</button>
-    </form>  
+     </form>  
   </div>
 
 <!-- End page content -->
@@ -367,6 +346,39 @@ function onClick(element) {
   var captionText = document.getElementById("caption");
   captionText.innerHTML = element.alt;
 }
+$(document).ready(function() {
+    const supabaseUrl = 'https://hslurwxazkuwdysnkgvi.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzbHVyd3hhemt1d2R5c25rZ3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY3NTUzNjYsImV4cCI6MjA0MjMzMTM2Nn0.63kA6Zl_gVHwnAweWMdDUr-_wXx_cbGs5-TCZHHZZIU';
+    const tableName = 'SVComplaints';
+    // calling the db to get all the complaints
+    $.ajax({
+            url: `${supabaseUrl}/rest/v1/${tableName}`,
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+                'apikey': supabaseKey
+            },
+            success: function(data) {
+              $('#complaints tbody').empty(); // Clear previous data
+                data.forEach(item => {
+                  var backgroundColor = item.status.toLowerCase() ==='resolved' ? 'lightgreen' : 'lightsalmon';
+                    $('#complaints tbody').append(                    
+                        '<tr><td>'+item.complaintId+'</td><td>'+item.description+'</td><td>'+item.dateCreated+'</td><td style="background-color: '+backgroundColor+';">'+item.status+'</td></tr>'
+                    ); 
+                });
+            },
+            error: function(error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+        $('#complaintsForm').on('submit', function(event) {
+        event.preventDefault();                         
+        $('input').val('');
+        alert("Complaint registered successfully !!!")
+    });
+
+});
 </script>
 
 </body>
