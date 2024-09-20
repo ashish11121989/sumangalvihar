@@ -14,6 +14,35 @@ body {font-size:16px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+  /* Basic styles for the modal */
+  #customAlert {
+      display: none; /* Hidden by default */
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+      z-index: 1000; /* On top of other elements */
+  }
+  .alert-content {
+      background-color: white;
+      margin: 15% auto; /* Centered */
+      padding: 20px;
+      border-radius: 5px;
+      width: 300px;
+      text-align: center;
+  }
+  .close-btn {
+      background-color: #4CAF50; /* Green */
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+  }
+</style>
 </head>
 <body>
 
@@ -306,21 +335,29 @@ body {font-size:16px;}
     <p>Register a new complaint and our team will get back to you on the resolution !!!</p>
    <form action="#" id="complaintsForm"> 
       <div class="w3-section">
-        <label>Name</label>
-        <input class="w3-input w3-border" type="text" name="Name" required>
+        <label>Name*</label>
+        <input class="w3-input w3-border" type="text" id="name" name="Name" minlength="2" placeholder="Minimum 2 characters" required>
       </div>
       <div class="w3-section">
-        <label>Phone Number</label>
-        <input class="w3-input w3-border" type="text" name="Email" required>
+        <label>Phone Number*</label>
+        <input class="w3-input w3-border" id="mobile" type="tel" pattern="^\+?[1-9]\d{1,14}$" minlength="10" placeholder="+1234567890"  name="Email" required>
       </div>
       <div class="w3-section">
-        <label>Please tell us about your problem</label>
-        <input class="w3-input w3-border" type="text" name="Message" required>
+        <label>Please tell us about your problem*</label>
+        <input class="w3-input w3-border" type="text" id="message" name="Message" required>
       </div>
       <button type="submit" class="w3-button w3-block w3-padding-large w3-red w3-margin-bottom">Submit</button>
      </form>  
   </div>
 
+
+  <div id="customAlert">
+    <div class="alert-content">
+        <h5 id="alertHeading">Alert Heading</h2>
+        <p id="alertMessage">This is the alert message!</p>
+        <button class="close-btn w3-red" onclick="closeAlert()">Close</button>
+    </div>
+</div>
 <!-- End page content -->
 </div>
 
@@ -346,12 +383,43 @@ function onClick(element) {
   var captionText = document.getElementById("caption");
   captionText.innerHTML = element.alt;
 }
-$(document).ready(function() {
-    const supabaseUrl = 'https://hslurwxazkuwdysnkgvi.supabase.co';
+
+function showAlert(heading, message) {
+        document.getElementById('alertHeading').innerText = heading; // Set custom heading
+        document.getElementById('alertMessage').innerText = message; // Set custom message
+        document.getElementById('customAlert').style.display = 'block'; // Show the alert box
+    }
+
+    function closeAlert() {
+        document.getElementById('customAlert').style.display = 'none'; // Hide the alert box
+    }
+
+$(document).ready(function() {      
+    loadData();
+        $('#complaintsForm').on('submit', function(event) {
+                
+        if($('#name').val().trim()==='' || $('#message').val().trim()==='')  
+        {
+          showAlert('Error', 'Name or Problem statememt is missing !')
+          return false;
+        }
+        if($('#name').val().trim().length<2)
+        {
+          showAlert('Error', 'Name must contain at least two characters !')
+          return false;
+        }
+        event.preventDefault();   
+        writeData($('#name').val().trim() , $('#mobile').val().trim() , $('#message').val().trim())            
+    });
+
+});
+
+function loadData()
+{
+  const supabaseUrl = 'https://hslurwxazkuwdysnkgvi.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzbHVyd3hhemt1d2R5c25rZ3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY3NTUzNjYsImV4cCI6MjA0MjMzMTM2Nn0.63kA6Zl_gVHwnAweWMdDUr-_wXx_cbGs5-TCZHHZZIU';
     const tableName = 'SVComplaints';
-    // calling the db to get all the complaints
-    $.ajax({
+  $.ajax({
             url: `${supabaseUrl}/rest/v1/${tableName}`,
             method: 'GET',
             headers: {
@@ -372,13 +440,45 @@ $(document).ready(function() {
                 console.error('Error fetching data:', error);
             }
         });
-        $('#complaintsForm').on('submit', function(event) {
-        event.preventDefault();                         
-        $('input').val('');
-        alert("Complaint registered successfully !!!")
-    });
+    
 
-});
+}
+
+function writeData(name , mobile , message)
+{
+  const supabaseUrl = 'https://hslurwxazkuwdysnkgvi.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzbHVyd3hhemt1d2R5c25rZ3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY3NTUzNjYsImV4cCI6MjA0MjMzMTM2Nn0.63kA6Zl_gVHwnAweWMdDUr-_wXx_cbGs5-TCZHHZZIU';
+    const tableName = 'SVComplaints';
+    const today = new Date();   
+    const data = {
+      complaintId: Math.random().toString().substr(2,5),
+        description: message,
+         name: name,
+         phoneNumber: mobile,
+         staus:'Pending',
+         dateCreated:today.getDay()+"-"+today.getMonth()+"-"+today.getFullYear()
+        }
+
+    $.ajax({
+        url: `${supabaseUrl}/rest/v1/${tableName}`,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Prefer': 'return=representation'
+        },
+        data: JSON.stringify(data),
+        success: function(result) {
+          $('input').val('');        
+        showAlert('Successfully Registered', 'Our team will get back to you!')
+        loadData()
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          showAlert('Error', 'Something went wrong please try later !!!')
+        }
+    });
+}
 </script>
 
 </body>
