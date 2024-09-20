@@ -450,14 +450,14 @@ function writeData(name , mobile , message)
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzbHVyd3hhemt1d2R5c25rZ3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY3NTUzNjYsImV4cCI6MjA0MjMzMTM2Nn0.63kA6Zl_gVHwnAweWMdDUr-_wXx_cbGs5-TCZHHZZIU';
     const tableName = 'SVComplaints';
     const today = new Date();   
-    const data = {
-      complaintId: Math.random().toString().substr(2,5),
+     const data = {
+      complaintId: 'SVC_'+today.getFullYear()+'_'+Math.random().toString().substr(2,5),
         description: message,
          name: name,
          phoneNumber: mobile,
          status:'Pending',
-         dateCreated:today.getDay()+"-"+today.getMonth()+"-"+today.getFullYear()
-        }
+         dateCreated:today.getDate()+"-"+today.getMonth()+1+"-"+today.getFullYear()
+        }   
 
     $.ajax({
         url: `${supabaseUrl}/rest/v1/${tableName}`,
