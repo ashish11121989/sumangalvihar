@@ -454,7 +454,7 @@ function writeData(name , mobile , message)
     var month = today.getMonth()+1;
     var year = today.getFullYear();
      const data = {
-      complaintId: 'SVC_'+today.getFullYear()+'_'+Math.random().toString().substr(2,5),
+      complaintId: Math.random().toString().substr(2,5),
         description: message,
          name: name,
          phoneNumber: mobile,
